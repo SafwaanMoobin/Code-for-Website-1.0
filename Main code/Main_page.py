@@ -101,6 +101,55 @@ def sign_up():
 
     sign_up_window.mainloop()
 
+def sign_in(): 
+    global users
+    # Function to validate username format
+    def validate_username(username):
+        return re.match(r'^[a-zA-Z0-9]{3,10}$', username)
+
+    # Function to handle sign-in button click
+    def sign_in_button_click():
+        username = username_entry.get()
+        password = password_entry.get()
+
+        # Validate username format
+        if not validate_username(username):
+            messagebox.showerror("Error", "Username must be 3-10 characters long and contain only letters and numbers.")
+            return
+
+        # Check if user exists and password matches
+        if username in users and users[username]['password'] == password:
+            messagebox.showinfo("Success", "User successfully signed in!")
+        else:
+            messagebox.showerror("Error", "Invalid username or password.")
+
+        # Clear the entry fields after sign-in attempt
+        username_entry.delete(0, tk.END)
+        password_entry.delete(0, tk.END)
+
+    # Create the sign-in window
+    sign_in_window = tk.Toplevel()
+    sign_in_window.geometry('400x200')
+    sign_in_window.title('Sign In')
+
+    # Username label and entry
+    tk.Label(sign_in_window, text='Username:').pack()
+    username_entry = tk.Entry(sign_in_window, width=30)
+    username_entry.pack()
+
+    # Password label and entry
+    tk.Label(sign_in_window, text='Password:').pack()
+    password_entry = tk.Entry(sign_in_window, show='*', width=30)
+    password_entry.pack()
+
+    # Sign in button
+    tk.Button(sign_in_window, text='Sign In', command=sign_in_button_click).pack()
+    sign_in.mainloop()
+
+
+
+
+
 def create_calendar_page():
     global date_entry  # Ensure the global scope of date_entry
 
@@ -275,6 +324,6 @@ tk.Button(Main_page, text='For hire', bg='#7F675B', font=('arial', 12, 'normal')
 tk.Label(Main_page, text='Information about our website', bg='#B0E0E6', font=('arial', 10, 'normal')).place(x=253, y=103)
 tk.Label(Main_page, text='Xtrive', bg='#B0E0E6', font=('arial', 25, 'normal')).place(x=69, y=71)
 tk.Button(Main_page, text='Sign Up', bg='#7F675B', font=('arial', 12, 'normal'), command=sign_up).place(x=466, y=7)
-
+tk.Button(Main_page, text='Sign Up', bg='#7F675B', font=('arial', 12, 'normal'), command=sign_in).place(x=466, y=58)
 
 Main_page.mainloop()
