@@ -1,12 +1,13 @@
 import tkinter as tk
 from tkcalendar import Calendar
 import re
-
+import tkinter.messagebox as messagebox
 selected_dates = []
 
 def store_date(date):
     selected_dates.append(date)
     print("Stored dates:", selected_dates)
+
 
 def on_date_selected(event):
     selected_date = cal.selection_get()
@@ -28,6 +29,77 @@ def validate_and_store_date():
             print("Invalid date")
     else:
         print("Invalid date format. Please use YYYY-MM-DD.")
+
+
+users = {}
+
+def sign_up():
+    global users
+
+    # Function to validate username format
+    def validate_username(username):
+        return re.match(r'^[a-zA-Z0-9]{3,10}$', username)
+
+    # Function to validate email format
+    def validate_email(email):
+        return re.match(r'^[^@]+@[^@]+\.[^@]+$', email)
+
+    # Function to handle sign-up button click
+    def sign_up_button_click():
+        username = username_entry.get()
+        password = password_entry.get()
+        email = email_entry.get()
+
+        # Validate username format
+        if not validate_username(username):
+            messagebox.showerror("Error", "Username must be 3-10 characters long and contain only letters and numbers.")
+            return
+
+        # Validate email format
+        if not validate_email(email):
+            messagebox.showerror("Error", "Invalid email format. Please enter in the format 'EmailExample@Organisation.com'.")
+            return
+
+        # Store user information in dictionary
+        users[username] = {
+            'password': password,
+            'email': email
+        }
+
+        # Clear the entry fields after successful sign-up
+        username_entry.delete(0, tk.END)
+        password_entry.delete(0, tk.END)
+        email_entry.delete(0, tk.END)
+
+        messagebox.showinfo("Success", "User successfully registered!")
+
+    # Create the sign-up window
+    sign_up_window = tk.Toplevel()
+    sign_up_window.geometry('400x300')
+    sign_up_window.title('Sign Up')
+
+    # Username label and entry
+    tk.Label(sign_up_window, text='Username:').pack()
+    username_entry = tk.Entry(sign_up_window, width=30)
+    username_entry.pack()
+
+    # Password label and entry
+    tk.Label(sign_up_window, text='Password:').pack()
+    password_entry = tk.Entry(sign_up_window, show='*', width=30)
+    password_entry.pack()
+
+
+    
+
+    # Email label and entry
+    tk.Label(sign_up_window, text='Email:').pack()
+    email_entry = tk.Entry(sign_up_window, width=30)
+    email_entry.pack()
+
+    # Sign up button
+    tk.Button(sign_up_window, text='Sign Up', command=sign_up_button_click).pack()
+
+    sign_up_window.mainloop()
 
 def create_calendar_page():
     global date_entry  # Ensure the global scope of date_entry
@@ -202,5 +274,7 @@ tk.Button(Main_page, text='Locations', bg='#7F675B', font=('arial', 12, 'normal'
 tk.Button(Main_page, text='For hire', bg='#7F675B', font=('arial', 12, 'normal'), command=For_Hire_Page).place(x=259, y=7)
 tk.Label(Main_page, text='Information about our website', bg='#B0E0E6', font=('arial', 10, 'normal')).place(x=253, y=103)
 tk.Label(Main_page, text='Xtrive', bg='#B0E0E6', font=('arial', 25, 'normal')).place(x=69, y=71)
+tk.Button(Main_page, text='Sign Up', bg='#7F675B', font=('arial', 12, 'normal'), command=sign_up).place(x=466, y=7)
+
 
 Main_page.mainloop()

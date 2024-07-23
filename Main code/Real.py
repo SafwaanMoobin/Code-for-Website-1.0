@@ -1,216 +1,233 @@
 import tkinter as tk
+import re
 from tkinter import ttk
-from tkinter import * 
+from tkinter import messagebox
 
 
 
-#second screen
+users = {}
 
-def screen2():
-	# this is a function to get the user input from the text input box
-	def getInputBoxValue():
-		userInput = Username.get()
-		return userInput
+def sign_up():
+    global users
 
+    # Function to validate username format
+    def validate_username(username):
+        return re.match(r'^[a-zA-Z0-9]{3,10}$', username)
 
-	# this is a function to get the user input from the text input box
-	def getInputBoxValue():
-		userInput = Password.get()
-		return userInput
+    # Function to validate email format
+    def validate_email(email):
+        return re.match(r'^[^@]+@[^@]+\.[^@]+$', email)
 
+    # Function to handle sign-up button click
+    def sign_up_button_click():
+        username = username_entry.get()
+        password = password_entry.get()
+        email = email_entry.get()
 
-	# this is a function to get the user input from the text input box
-	def getInputBoxValue():
-		userInput = Email.get()
-		return userInput
+        # Validate username format
+        if not validate_username(username):
+            messagebox.showerror("Error", "Username must be 3-10 characters long and contain only letters and numbers.")
+            return
 
+        # Validate email format
+        if not validate_email(email):
+            messagebox.showerror("Error", "Invalid email format. Please enter in the format 'EmailExample@Organisation.com'.")
+            return
 
-	# this is the function called when the button is clicked
-	def btnClickFunction():
-		Screen2.withdraw()
+        # Store user information in dictionary
+        users[username] = {
+            'password': password,
+            'email': email
+        }
 
+        # Clear the entry fields after successful sign-up
+        username_entry.delete(0, tk.END)
+        password_entry.delete(0, tk.END)
+        email_entry.delete(0, tk.END)
 
+        messagebox.showinfo("Success", "User successfully registered!")
 
-	Screen2 = Tk()
+    # Create the sign-up window
+    sign_up_window = tk.Toplevel()
+    sign_up_window.geometry('400x300')
+    sign_up_window.title('Sign Up')
 
-	# This is the section of code which creates the main window
-	Screen2.geometry('878x581')
-	Screen2.configure(background='#F5F5DC')
-	Screen2.title('Login window')
+    # Username label and entry
+    tk.Label(sign_up_window, text='Username:').pack()
+    username_entry = tk.Entry(sign_up_window, width=30)
+    username_entry.pack()
 
+    # Password label and entry
+    tk.Label(sign_up_window, text='Password:').pack()
+    password_entry = tk.Entry(sign_up_window, show='*', width=30)
+    password_entry.pack()
 
-	# This is the section of code which creates a text input box
-	Username=Entry(Screen2)
-	Username.place(x=181, y=187)
 
+    
 
-	# This is the section of code which creates a text input box
-	Password=Entry(Screen2)
-	Password.place(x=180, y=257)
+    # Email label and entry
+    tk.Label(sign_up_window, text='Email:').pack()
+    email_entry = tk.Entry(sign_up_window, width=30)
+    email_entry.pack()
 
+    # Sign up button
+    tk.Button(sign_up_window, text='Sign Up', command=sign_up_button_click).pack()
 
-	# This is the section of code which creates a text input box
-	Email=Entry(Screen2)
-	Email.place(x=180, y=330)
+    sign_up_window.mainloop()
 
+def For_Hire_Page():
+    global for_hire
 
-	# This is the section of code which creates the a label
-	Label(Screen2, text='Sign up', bg='#F5F5DC', font=('arial', 20, 'normal')).place(x=207, y=91)
+    # Function definitions for "For hire" page buttons
+    def onebtnClickFunction():
+        print('1')
 
+    def twobtnClickFunction():
+        print('2')
 
-	# This is the section of code which creates the a label
-	Label(Screen2, text='Find The best results with our companies', bg='#F5F5DC', font=('arial', 20, 'normal')).place(x=32, y=505)
+    def threebtnClickFunction():
+        print('3')
 
+    def fourbtnClickFunction():
+        print('4')
 
-	# This is the section of code which creates a button
-	Button(Screen2, text='Sign up ', bg='#A9A9A9', font=('arial', 20, 'normal'), command=btnClickFunction).place(x=177, y=381)
+    def Back_to_Main_btnClickFunction():
+        close_for_hire_page()
 
+    # Create "For hire" page
+    for_hire = tk.Tk()
+    for_hire.geometry('510x400')
+    for_hire.configure(background='#FFEBCD')
+    for_hire.title('For Hire')
 
+    # Buttons and labels for "For hire" page
+    tk.Button(for_hire, text='Button text!', bg='#FFEBCD', font=('arial', 15, 'normal'), command=onebtnClickFunction).place(x=119, y=165)
+    tk.Button(for_hire, text='Button text1!', bg='#FFEBCD', font=('arial', 15, 'normal'), command=twobtnClickFunction).place(x=313, y=164)
+    tk.Button(for_hire, text='Button text2!', bg='#FFEBCD', font=('arial', 15, 'normal'), command=threebtnClickFunction).place(x=106, y=353)
+    tk.Button(for_hire, text='Button text3!', bg='#FFEBCD', font=('arial', 15, 'normal'), command=fourbtnClickFunction).place(x=314, y=351)
+    tk.Button(for_hire, text='Back to main page', bg='#FFEBCD', font=('arial', 15, 'normal'), command=Back_to_Main_btnClickFunction).place(x=299, y=13)
+    tk.Label(for_hire, text='Welcome to the extensive amount of people to hire', bg='#FFEBCD', font=('arial', 15, 'normal')).place(x=12, y=91)
+
+    for_hire.mainloop()
+Locations = None
+def Locations_Page():
+    global Locations
+
+    # Function definitions for "Locations" page buttons
+    def Location_One_btnClickFunction():
+        print('clicked')
+
+    def btnClickFunction():
+        print('clicked')
+
+    def Location_three_btnClickFunction():
+        print('clicked')
+
+    def Location_Four_btnClickFunction():
+        print('clicked')
+
+    def Location_Five_btnClickFunction():
+        print('clicked')
+
+    def Location_Six_btnClickFunction():
+        print('clicked')
+# This is the section of code which creates a combo box
+    location_options = ['Location 1', 'Location 2', 'Location 3', 'Location 4', 'Location 5', 'Location 6']
+    location_combobox = ttk.Combobox(Locations, values=location_options, font=('arial', 12, 'normal'), width=20)
+    location_combobox.place(x=50, y=100)
+    location_combobox.current(0)  # Set the default selection
 
 
 
+    # Buttons and labels for "Locations" page
+    tk.Label(Locations, text='All the Locations Available', bg='#8B7D6B', font=('arial', 15, 'normal')).place(x=14, y=35)
+    tk.Button(Locations, text='Location 1', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_One_btnClickFunction).place(x=76, y=202)
+    tk.Button(Locations, text='Location 2', bg='#F5F5DC', font=('arial', 5, 'normal'), command=btnClickFunction).place(x=307, y=204)
+    tk.Button(Locations, text='Location 3', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_three_btnClickFunction).place(x=514, y=209)
+    tk.Button(Locations, text='Location 4', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_Four_btnClickFunction).place(x=76, y=360)
+    tk.Button(Locations, text='Location 5', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_Five_btnClickFunction).place(x=306, y=359)
+    tk.Button(Locations, text='Location 6', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_Six_btnClickFunction).place(x=515, y=354)
+    tk.Label(Locations, text='Exquisite locations for our valued customers', bg='#8B7D6B', font=('arial', 8, 'normal')).place(x=408, y=14)
+    
+    Locations.mainloop()
 
-# this is a function to get the user input from the text input box
-def getInputBoxValue():
-	userInput = Username.get()
-	return userInput
+def close_about_page():
+    Main_page.destroy()
 
+def close_for_hire_page():
+    for_hire.destroy()
 
-# this is a function to get the user input from the text input box
-def getInputBoxValue():
-	userInput = Password.get()
-	return userInput
+def Services_btnClickFunction():
+    close_about_page()
 
+def Locations_btnClickFunction():
+    global locations_page
+    locations_page = tk.Toplevel()
+    locations_page.geometry('400x300')
+    locations_page.title('Locations')
 
-# this is the function called when the button is clicked
-def btnLoginFunction():
-	Screen1.destroy()
-	
-	
-def btnSwitchToSignUp():
-	Screen1.destroy()
-	screen2()
+def About_Us_btnClickFunction():
+    global about_page
+    about_page = tk.Toplevel(Main_page)
+    about_page.geometry('400x300')
+    about_page.title('About Us')
 
+    tk.Label(about_page, text='About Us', bg='#B0E0E6', font=('arial', 12, 'normal')).pack(pady=10)
 
-Screen1 = Tk()
+    about_text = """
+    Welcome to Xtrive Services!
+    
+    We are dedicated to providing top-notch services to our customers.
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vestibulum finibus ex, at blandit dolor sodales a.
+    """
 
-# This is the section of code which creates the main window
-Screen1.geometry('878x581')
-Screen1.configure(background='#F5F5DC')
-Screen1.title('Login window')
+    tk.Label(about_page, text=about_text, justify='left', wraplength=380, font=('arial', 10, 'normal')).pack(padx=20, pady=10)
 
+    tk.Button(about_page, text='Close', bg='#FFFFFF', font=('arial', 12, 'normal'), command=close_about_page).pack(pady=10)
+    tk.Button(about_page, text='Back to Main', bg='#FFFFFF', font=('arial', 12, 'normal'), command=show_main_window).pack(pady=10)
 
-# This is the section of code which creates a text input box
-Username=Entry(Screen1)
-Username.place(x=181, y=187)
+    about_page.transient(Main_page)  # Set about_page as transient to Main_page
+    about_page.grab_set()       # Grab focus to about_page
+    Main_page.wait_window(about_page)  # Wait for about_page to be closed
 
+def show_main_window():
+    global Main_page
+    about_page.destroy()  # Destroy the about_page window
+    Main_page.deiconify()      # Show the main window
 
-# This is the section of code which creates a text input box
-Password=Entry(Screen1)
-Password.place(x=180, y=257)
+Main_page = tk.Tk()
+Main_page.geometry('512x393')
+Main_page.configure(background='#F5f5dc')
+Main_page.title('Hello, I\'m the main window')
 
+# Function to create a white frame with specified dimensions
+def create_white_frame(x, y, width, height):
+    frame = tk.Frame(Main_page, bg='#FFFFFF', width=width, height=height)
+    frame.place(x=x, y=y)
+    return frame
 
-# This is the section of code which creates a button
-Button(Screen1, text='Login', bg='#F5F5DC', font=('arial', 12, 'normal'), command=btnLoginFunction).place(x=181, y=354)
-Button(Screen1, text='Switch to sign up page', bg='#F3F5DC', font=('arial', 12, 'normal'), command=btnSwitchToSignUp).place(x=181, y=304)
-Button(Screen1, text='Our Team', bg='#F3F5DC', font=('arial', 10, 'normal'), command=btnSwitchToSignUp).place(x=620, y=187)
-Button(Screen1, text='Locations', bg='#F3F5DC', font=('arial', 10, 'normal'), command=btnSwitchToSignUp).place(x=620, y=257)
+# Create white frames as backgrounds for the buttons and labels
+create_white_frame(0, 100, 512, 50)  # Horizontal line under the labels
+create_white_frame(250, 0, 50, 343)  # Vertical line between 'About us' and 'Services'
+create_white_frame(390, 50, 50, 600)  # Vertical line between 'Services' and 'Locations'
+create_white_frame(250, 100, 263, 50)  # Horizontal line under the buttons
 
+# Labels and buttons on the main page
+tk.Label(Main_page, text='Welcome to Xtrive Services', bg='#B0E0E6', font=('arial', 12, 'normal')).place(x=17, y=27)
+tk.Button(Main_page, text='About us', bg='#7F675B', font=('arial', 12, 'normal'), command=About_Us_btnClickFunction).place(x=252, y=59)
+tk.Button(Main_page, text='Services', bg='#7F675B', font=('arial', 12, 'normal'), command=Services_btnClickFunction).place(x=366, y=58)
+tk.Button(Main_page, text='Locations', bg='#7F675B', font=('arial', 12, 'normal'), command=Locations_Page).place(x=361, y=7)
+tk.Button(Main_page, text='For hire', bg='#7F675B', font=('arial', 12, 'normal'), command=For_Hire_Page).place(x=259, y=7)
+tk.Label(Main_page, text='Information about our website', bg='#B0E0E6', font=('arial', 10, 'normal')).place(x=253, y=103)
+tk.Label(Main_page, text='Xtrive', bg='#B0E0E6', font=('arial', 25, 'normal')).place(x=69, y=71)
 
+# Sign up button on the main page
+tk.Button(Main_page, text='Sign Up', bg='#7F675B', font=('arial', 12, 'normal'), command=sign_up).place(x=466, y=7)
 
 
 
-# This is the section of code which creates the a label
-Label(Screen1, text='Sign in', bg='#F5F5DC', font=('arial', 20, 'normal')).place(x=204, y=102)
+Main_page.mainloop()
 
 
-# This is the section of code which creates the a label
-Label(Screen1, text='About me', bg='#F5F5DC', font=('arial', 20, 'normal')).place(x=600, y=86)
 
 
-Screen1.mainloop()
-
-Screen1.mainloop()
-
-
-
-def screen3():
-# this is the function called when the button is clicked
-	def btnClickFunction():
-		print('clicked')
-
-
-# this is the function called when the button is clicked
-	def btnClickFunction():
-		print('clicked')
-
-
-# this is the function called when the button is clicked
-	def btnClickFunction():
-		print('clicked')
-
-
-# this is the function called when the button is clicked
-	def btnClickFunction():
-		print('clicked')
-
-
-# this is the function called when the button is clicked
-	def btnClickFunction():
-		print('clicked')
-
-
-
-	Screen3 = Tk()
-
-# This is the section of code which creates the main window
-	Screen3.geometry('623x394')
-	Screen3.configure(background='#838B8B')
-	Screen3.title('Hello, I\'m the main window')
-
-
-# This is the section of code which creates the a label
-	Label(Screen3, text='Event orginiser', bg='#838B8B', font=('arial', 30, 'normal')).place(x=22, y=39)
-
-
-# This is the section of code which creates a button
-	Button(Screen3, text='Sign in ', bg='#EED5B7', font=('arial', 8, 'normal'), command=btnClickFunction).place(x=370, y=10)
-
-
-# This is the section of code which creates a button
-	Button(Screen3, text='Sign up', bg='#EED5B7', font=('arial', 8, 'normal'), command=btnClickFunction).place(x=466, y=10)
-
-
-# This is the section of code which creates a button
-	Button(Screen3, text='Packages', bg='#EED5B7', font=('arial', 8, 'normal'), command=btnClickFunction).place(x=550, y=10)
-
-
-# First, we create a canvas to put the picture on
-	Ty= Canvas(Screen3, height=100, width=100)
-# Then, we actually create the image file to use (it has to be a *.gif)
-	picture_file = PhotoImage(file = '')  # <-- you will have to copy-paste the filepath here, for example 'C:\Desktop\pic.gif'
-# Finally, we create the image on the canvas and then place it onto the main window
-	Ty.create_image(100, 0, anchor=NE, image=picture_file)
-	Ty.place(x=106, y=117)
-
-
-# First, we create a canvas to put the picture on
-	Image= Canvas(Screen3, height=100, width=100)
-# Then, we actually create the image file to use (it has to be a *.gif)
-	picture_file = PhotoImage(file = '')  # <-- you will have to copy-paste the filepath here, for example 'C:\Desktop\pic.gif'
-# Finally, we create the image on the canvas and then place it onto the main window
-	Image.create_image(100, 0, anchor=NE, image=picture_file)
-	Image.place(x=425, y=117)
-
-
-# This is the section of code which creates a button
-	Button(Screen3, text='Admin ', bg='#EED5B7', font=('arial', 8, 'normal'), command=btnClickFunction).place(x=130, y=239)
-
-
-# This is the section of code which creates a button
-	Button(Screen3, text='About us', bg='#EED5B7', font=('arial', 8, 'normal'), command=btnClickFunction).place(x=443, y=238)
-
-
-	Screen3.mainloop()
-
-	
