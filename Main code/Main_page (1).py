@@ -379,4 +379,6 @@ login_button.place(x=400, y=235)
 tk.Button(login_page, text='Sign up', bg='#B0E0E6', font=('arial', 9, 'normal'), command=sign_up).place(x=400, y=61)
 
 login_page.mainloop()
+mmand=Main_Page.place(x=400, y=235)
 
+Login_page.mainloop()
