@@ -2,7 +2,12 @@ import tkinter as tk
 from tkcalendar import Calendar
 import re
 import tkinter.messagebox as messagebox
+from tkinter import * 
+import csv
+
+
 selected_dates = []
+
 
 def store_date(date):
     selected_dates.append(date)
@@ -31,49 +36,75 @@ def validate_and_store_date():
         print("Invalid date format. Please use YYYY-MM-DD.")
 
 
+
+# Initialize empty users dictionary
 users = {}
 
+# Function to validate username format
+def validate_username(username):
+    return re.match(r'^[a-zA-Z0-9]{3,10}$', username)
+
+# Function to validate email format
+def validate_email(email):
+    return re.match(r'^[^@]+@[^@]+\.[^@]+$', email)
+
+# Function to read existing users from users.csv
+def load_users():
+    try:
+        with open('users.csv', mode='r') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip header row
+            for row in reader:
+                username, password, email = row
+                users[username] = {'password': password, 'email': email}
+    except FileNotFoundError:
+        # Handle the case where users.csv doesn't exist yet
+        pass
+
+# Load existing users when the program starts
+load_users()
+
+# Function to handle sign-up button click
+def sign_up_button_click(username_entry, password_entry, email_entry):
+    username = username_entry.get()
+    password = password_entry.get()
+    email = email_entry.get()
+
+    # Validate username format
+    if not validate_username(username):
+        messagebox.showerror("Error", "Username must be 3-10 characters long and contain only letters and numbers.")
+        return
+
+    # Validate email format
+    if not validate_email(email):
+        messagebox.showerror("Error", "Invalid email format. Please enter in the format 'EmailExample@Organisation.com'.")
+        return
+
+    # Check if username already exists
+    if username in users:
+        messagebox.showerror("Error", "Username already exists. Please choose a different username.")
+        return
+
+    # Store user information in dictionary
+    users[username] = {
+        'password': password,
+        'email': email
+    }
+
+    # Write user information to CSV file immediately
+    with open('users.csv', mode='a', newline='') as file:
+        writer = csv.writer(file, delimiter=',')
+        writer.writerow([username, password, email])
+
+    # Clear the entry fields after successful sign-up
+    username_entry.delete(0, tk.END)
+    password_entry.delete(0, tk.END)
+    email_entry.delete(0, tk.END)
+
+    messagebox.showinfo("Success", "User successfully registered!")
+
+# Function to handle sign-up window creation
 def sign_up():
-    global users
-
-    # Function to validate username format
-    def validate_username(username):
-        return re.match(r'^[a-zA-Z0-9]{3,10}$', username)
-
-    # Function to validate email format
-    def validate_email(email):
-        return re.match(r'^[^@]+@[^@]+\.[^@]+$', email)
-
-    # Function to handle sign-up button click
-    def sign_up_button_click():
-        username = username_entry.get()
-        password = password_entry.get()
-        email = email_entry.get()
-
-        # Validate username format
-        if not validate_username(username):
-            messagebox.showerror("Error", "Username must be 3-10 characters long and contain only letters and numbers.")
-            return
-
-        # Validate email format
-        if not validate_email(email):
-            messagebox.showerror("Error", "Invalid email format. Please enter in the format 'EmailExample@Organisation.com'.")
-            return
-
-        # Store user information in dictionary
-        users[username] = {
-            'password': password,
-            'email': email
-        }
-
-        # Clear the entry fields after successful sign-up
-        username_entry.delete(0, tk.END)
-        password_entry.delete(0, tk.END)
-        email_entry.delete(0, tk.END)
-
-        messagebox.showinfo("Success", "User successfully registered!")
-
-    # Create the sign-up window
     sign_up_window = tk.Toplevel()
     sign_up_window.geometry('400x300')
     sign_up_window.title('Sign Up')
@@ -88,46 +119,38 @@ def sign_up():
     password_entry = tk.Entry(sign_up_window, show='*', width=30)
     password_entry.pack()
 
-
-    
-
     # Email label and entry
     tk.Label(sign_up_window, text='Email:').pack()
     email_entry = tk.Entry(sign_up_window, width=30)
     email_entry.pack()
 
     # Sign up button
-    tk.Button(sign_up_window, text='Sign Up', command=sign_up_button_click).pack()
+    tk.Button(sign_up_window, text='Sign Up', command=lambda: sign_up_button_click(username_entry, password_entry, email_entry)).pack()
 
     sign_up_window.mainloop()
 
-def sign_in(): 
-    global users
-    # Function to validate username format
-    def validate_username(username):
-        return re.match(r'^[a-zA-Z0-9]{3,10}$', username)
+# Function to handle sign-in button click
+def sign_in_button_click(username_entry, password_entry):
+    username = username_entry.get()
+    password = password_entry.get()
 
-    # Function to handle sign-in button click
-    def sign_in_button_click():
-        username = username_entry.get()
-        password = password_entry.get()
+    # Validate username format
+    if not validate_username(username):
+        messagebox.showerror("Error", "Username must be 3-10 characters long and contain only letters and numbers.")
+        return
 
-        # Validate username format
-        if not validate_username(username):
-            messagebox.showerror("Error", "Username must be 3-10 characters long and contain only letters and numbers.")
-            return
+    # Check if user exists and password matches
+    if username in users and users[username]['password'] == password:
+        messagebox.showinfo("Success", "User successfully signed in!")
+    else:
+        messagebox.showerror("Error", "Invalid username or password.")
 
-        # Check if user exists and password matches
-        if username in users and users[username]['password'] == password:
-            messagebox.showinfo("Success", "User successfully signed in!")
-        else:
-            messagebox.showerror("Error", "Invalid username or password.")
+    # Clear the entry fields after sign-in attempt
+    username_entry.delete(0, tk.END)
+    password_entry.delete(0, tk.END)
 
-        # Clear the entry fields after sign-in attempt
-        username_entry.delete(0, tk.END)
-        password_entry.delete(0, tk.END)
-
-    # Create the sign-in window
+# Function to handle sign-in window creation
+def sign_in():
     sign_in_window = tk.Toplevel()
     sign_in_window.geometry('400x200')
     sign_in_window.title('Sign In')
@@ -143,9 +166,9 @@ def sign_in():
     password_entry.pack()
 
     # Sign in button
-    tk.Button(sign_in_window, text='Sign In', command=sign_in_button_click).pack()
-    sign_in.mainloop()
+    tk.Button(sign_in_window, text='Sign In', command=lambda: sign_in_button_click(username_entry, password_entry)).pack()
 
+    sign_in_window.mainloop()
 
 
 
@@ -298,32 +321,45 @@ def About_Us_btnClickFunction():
     tk.Label(about_page, text=about_text, justify='left', wraplength=380, font=('arial', 10, 'normal')).pack(padx=20, pady=10)
     tk.Button(about_page, text='Close', bg='#FFFFFF', font=('arial', 12, 'normal'), command=about_page.destroy).pack(pady=10)
 
-# Main Page
-Main_page = tk.Tk()
-Main_page.geometry('512x393')
-Main_page.configure(background='#F5f5dc')
-Main_page.title('Hello, I\'m the main window')
+def Main_Page():
+    # Main Page
+    Main_page = tk.Tk()
+    Main_page.geometry('512x393')
+    Main_page.configure(background='#F5f5dc')
+    Main_page.title('Hello, I\'m the main window')
 
-# Function to create a white frame with specified dimensions
-def create_white_frame(x, y, width, height):
-    frame = tk.Frame(Main_page, bg='#FFFFFF', width=width, height=height)
-    frame.place(x=x, y=y)
-    return frame
+    # Function to create a white frame with specified dimensions
+    def create_white_frame(x, y, width, height):
+        frame = tk.Frame(Main_page, bg='#FFFFFF', width=width, height=height)
+        frame.place(x=x, y=y)
+        return frame
 
-# Create white frames as backgrounds for the buttons and labels
-create_white_frame(0, 100, 512, 50)  # Horizontal line under the labels
-create_white_frame(250, 0, 50, 343)  # Vertical line between 'About us' and 'Services'
-create_white_frame(390, 50, 50, 600)  # Vertical line between 'Services' and 'Locations'
-create_white_frame(250, 100, 263, 50)  # Horizontal line under the buttons
+    # Create white frames as backgrounds for the buttons and labels
+    create_white_frame(0, 100, 512, 50)  # Horizontal line under the labels
+    create_white_frame(250, 0, 50, 343)  # Vertical line between 'About us' and 'Services'
+    create_white_frame(390, 50, 50, 600)  # Vertical line between 'Services' and 'Locations'
+    create_white_frame(250, 100, 263, 50)  # Horizontal line under the buttons
 
-tk.Label(Main_page, text='Welcome to Xtrive Services', bg='#B0E0E6', font=('arial', 12, 'normal')).place(x=17, y=27)
-tk.Button(Main_page, text='About us', bg='#7F675B', font=('arial', 12, 'normal'), command=About_Us_btnClickFunction).place(x=252, y=59)
-tk.Button(Main_page, text='Services', bg='#7F675B', font=('arial', 12, 'normal'), command=Services_page).place(x=366, y=58)
-tk.Button(Main_page, text='Locations', bg='#7F675B', font=('arial', 12, 'normal'), command=Locations_Page).place(x=361, y=7)
-tk.Button(Main_page, text='For hire', bg='#7F675B', font=('arial', 12, 'normal'), command=For_Hire_Page).place(x=259, y=7)
-tk.Label(Main_page, text='Information about our website', bg='#B0E0E6', font=('arial', 10, 'normal')).place(x=253, y=103)
-tk.Label(Main_page, text='Xtrive', bg='#B0E0E6', font=('arial', 25, 'normal')).place(x=69, y=71)
-tk.Button(Main_page, text='Sign Up', bg='#7F675B', font=('arial', 12, 'normal'), command=sign_up).place(x=466, y=7)
-tk.Button(Main_page, text='Sign Up', bg='#7F675B', font=('arial', 12, 'normal'), command=sign_in).place(x=466, y=58)
+    tk.Label(Main_page, text='Welcome to Xtrive Services', bg='#B0E0E6', font=('arial', 12, 'normal')).place(x=17, y=27)
+    tk.Button(Main_page, text='About us', bg='#7F675B', font=('arial', 12, 'normal'), command=About_Us_btnClickFunction).place(x=252, y=59)
+    tk.Button(Main_page, text='Services', bg='#7F675B', font=('arial', 12, 'normal'), command=Services_page).place(x=366, y=58)
+    tk.Button(Main_page, text='Locations', bg='#7F675B', font=('arial', 12, 'normal'), command=Locations_Page).place(x=361, y=7)
+    tk.Button(Main_page, text='For hire', bg='#7F675B', font=('arial', 12, 'normal'), command=For_Hire_Page).place(x=259, y=7)
+    tk.Label(Main_page, text='Information about our website', bg='#B0E0E6', font=('arial', 10, 'normal')).place(x=253, y=103)
+    tk.Label(Main_page, text='Xtrive', bg='#B0E0E6', font=('arial', 25, 'normal')).place(x=69, y=71)
+    
+    
 
-Main_page.mainloop()
+# Example usage in main window
+Login_page = tk.Tk()
+Login_page.geometry('637x401')
+Login_page.configure(background='#F0F8FF')
+Login_page.title('Hello, I\'m the main window')
+
+# Buttons to open sign-up and sign-in windows
+tk.Button(Login_page, text='Sign Up', bg='#7F675B', font=('arial', 12, 'normal'), command=sign_up).place(x=250, y=200)
+tk.Button(Login_page, text='Sign In', bg='#7F675B', font=('arial', 12, 'normal'), command=sign_in).place(x=250, y=235)
+tk.Button(Login_page, text='login', bg='#7F675B', font=('arial', 12, 'normal'), command=Main_Page).place(x=400, y=235)
+
+Login_page.mainloop()
+
