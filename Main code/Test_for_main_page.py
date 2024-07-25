@@ -4,7 +4,7 @@ import re
 import tkinter.messagebox as messagebox
 from tkinter import * 
 import csv
-
+from tkinter import ttk
 
 selected_dates = []
 
@@ -48,21 +48,21 @@ def validate_username(username):
 def validate_email(email):
     return re.match(r'^[^@]+@[^@]+\.[^@]+$', email)
 
-# Function to read existing users from users.csv
-def load_users():
-    try:
-        with open('users.csv', mode='r') as file:
-            reader = csv.reader(file)
-            next(reader)  # Skip header row
-            for row in reader:
-                username, password, email = row
-                users[username] = {'password': password, 'email': email}
-    except FileNotFoundError:
-        # Handle the case where users.csv doesn't exist yet
-        pass
+# # Function to read existing users from users.csv
+# def load_users():
+#     try:
+#         with open('users.csv', mode='r') as file:
+#             reader = csv.reader(file)
+#             next(reader)  # Skip header row
+#             for row in reader:
+#                 username, password, email = row
+#                 users[username] = {'password': password, 'email': email}
+#     except FileNotFoundError:
+#         # Handle the case where users.csv doesn't exist yet
+#         pass
 
-# Load existing users when the program starts
-load_users()
+# # Load existing users when the program starts
+# load_users()
 
 # Function to handle sign-up button click
 def sign_up_button_click(username_entry, password_entry, email_entry):
@@ -130,18 +130,26 @@ def sign_up():
     sign_up_window.mainloop()
 
 
-# Function to load users from CSV file
+users = {}  # Initialize an empty dictionary to store user data
+
 def load_users():
     try:
         with open('users.csv', mode='r', newline='') as file:
             reader = csv.reader(file)
             for row in reader:
-                username, password, email = row
-                users[username] = {'password': password, 'email': email}
+                try:
+                    if len(row) >= 3:
+                        username, password, email = row[:3]  # Take only the first three elements
+                        users[username] = {'password': password, 'email': email, 'bookings': {}}
+                        # You can process additional fields here if needed
+                    else:
+                        print(f"Ignoring invalid data row: {row}")
+                except ValueError as e:
+                    print(f"Error processing row: {row}. Error: {e}")
     except FileNotFoundError:
-        pass
+        print("users.csv file not found.")
 
-# Load users from CSV file at the start
+# Example usage:
 load_users()
 
 # Function to validate the username
@@ -200,31 +208,75 @@ def create_calendar_page():
     tk.Button(calendar_page, text='Back to main page', bg='#B0E0E6', font=('arial', 9, 'normal'), command=Back_to_main_page_btnClickFunction).place(x=474, y=61)
 
 def Services_page():
+    # this is the function called when the button is clicked
     def btnClickFunction():
         print('clicked')
 
-    def Custom_btnClickFunction():
+
+    # this is the function called when the button is clicked
+    def btnClickFunction():
         print('clicked')
 
-    def Business_Leisures_btnClickFunction():
-        create_calendar_page()
 
-    def Back_to_main_page_btnClickFunction():
-        services_packages.destroy()
+    # this is a function which returns the selected combo box item
+    def getSelectedComboItem():
+        return COmbo.get()
 
-    # Set up the services window
-    services_packages = tk.Toplevel()
-    services_packages.geometry('596x442')
-    services_packages.configure(background='#8B8378')
-    services_packages.title('Services')
 
-    # Create labels and buttons
-    tk.Label(services_packages, text='Choose packages that you prefer from our extensive line of event and hire options', bg='#8B8378', font=('arial', 12, 'normal')).place(x=12, y=23)
-    tk.Label(services_packages, text='split line', bg='#8B8378', font=('arial', 12, 'normal')).place(x=268, y=65)
-    tk.Button(services_packages, text='Weddings', bg='#000000', font=('arial', 12, 'normal'), command=btnClickFunction).place(x=45, y=301)
-    tk.Button(services_packages, text='Customize', bg='#0000FF', font=('arial', 12, 'normal'), command=Custom_btnClickFunction).place(x=231, y=303)
-    tk.Button(services_packages, text='Business Leisures', bg='#0000FF', font=('arial', 12, 'normal'), command=Business_Leisures_btnClickFunction).place(x=403, y=309)
-    tk.Button(services_packages, text='Back to main page', bg='#B0E0E6', font=('arial', 9, 'normal'), command=Back_to_main_page_btnClickFunction).place(x=474, y=61)
+    # this is the function called when the button is clicked
+    def btnClickFunction():
+        print('clicked')
+
+
+
+    Pacakges = Tk()
+    # Pacakges = ttk()
+
+
+    # This is the section of code which creates the main window
+    Pacakges.geometry('596x451')
+    Pacakges.configure(background='#F0F8FF')
+    Pacakges.title('Hello, I\'m the main window')
+
+
+    # This is the section of code which creates a button
+    Button(Pacakges, text='Back to main menu', bg='#F0F8FF', font=('arial', 10, 'normal'), command=btnClickFunction).place(x=436, y=34)
+
+
+    # This is the section of code which creates the a label
+    Label(Pacakges, text='Packages', bg='#F0F8FF', font=('arial', 17, 'normal')).place(x=28, y=41)
+
+
+    # This is the section of code which creates the a label
+    Label(Pacakges, text='Art/Auction', bg='#F0F8FF', font=('arial', 15, 'normal')).place(x=95, y=126)
+
+
+    # This is the section of code which creates the a label
+    Label(Pacakges, text='Business ', bg='#F0F8FF', font=('arial', 15, 'normal')).place(x=264, y=304)
+
+
+    # This is the section of code which creates the a label
+    Label(Pacakges, text='Ceromony/wedding', bg='#F0F8FF', font=('arial', 15, 'normal')).place(x=395, y=121)
+
+
+    # This is the section of code which creates the a label
+    Label(Pacakges, text='Custom', bg='#F0F8FF', font=('arial', 13, 'normal')).place(x=51, y=382)
+
+
+    # This is the section of code which creates a button
+    Button(Pacakges, text='For Hire', bg='#F0F8FF', font=('arial', 13, 'normal'), command=btnClickFunction).place(x=162, y=372)
+
+    # This is the section of code which creates a button
+    Button(Pacakges, text='Submit', bg='#F0F8FF', font=('arial', 8, 'normal'), command=btnClickFunction).place(x=425, y=414)
+
+
+    # This is the section of code which creates a combo box
+    COmbo= ttk.Combobox(Pacakges, values=['Art/Auction', 'Buisness', 'Ceromony/Wedding'], font=('arial', 12, 'normal'), width=10)
+    COmbo.place(x=360, y=377)
+    COmbo.current(3)
+
+
+        
 
 def For_Hire_Page():
     def onebtnClickFunction():
@@ -257,43 +309,75 @@ def For_Hire_Page():
     tk.Label(for_hire, text='Welcome to the extensive amount of people to hire', bg='#FFEBCD', font=('arial', 15, 'normal')).place(x=12, y=91)
 
 def Locations_Page():
-    def Location_One_btnClickFunction():
-        print('clicked')
-
+    # this is the function called when the button is clicked
     def btnClickFunction():
         print('clicked')
 
-    def Location_three_btnClickFunction():
-        print('clicked')
 
-    def Location_Four_btnClickFunction():
-        print('clicked')
+    # this is a function which returns the selected combo box item
+    def getSelectedComboItem():
+        return comboOneTwoPunch.get()
 
-    def Location_Five_btnClickFunction():
-        print('clicked')
 
-    def Location_Six_btnClickFunction():
-        print('clicked')
+   
+    Locations = Tk()
 
-    def Back_to_main_page_btnClickFunction():
-        locations.destroy()
+    # This is the section of code which creates the main window
+    Locations.geometry('612x373')
+    Locations.configure(background='#F0F8FF')
+    Locations.title('Hello, I\'m the main window')
 
-    # Set up the locations window
-    locations = tk.Toplevel()
-    locations.geometry('691x405')
-    locations.configure(background='#8B7D6B')
-    locations.title('Locations')
 
-    # Create labels and buttons
-    tk.Label(locations, text='All the Locations Available', bg='#8B7D6B', font=('arial', 15, 'normal')).place(x=14, y=35)
-    tk.Button(locations, text='Location 1', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_One_btnClickFunction).place(x=76, y=202)
-    tk.Button(locations, text='Location 2', bg='#F5F5DC', font=('arial', 5, 'normal'), command=btnClickFunction).place(x=307, y=204)
-    tk.Button(locations, text='Location 3', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_three_btnClickFunction).place(x=514, y=209)
-    tk.Button(locations, text='Location 4', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_Four_btnClickFunction).place(x=76, y=360)
-    tk.Button(locations, text='Location 5', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_Five_btnClickFunction).place(x=306, y=359)
-    tk.Button(locations, text='Location 6', bg='#F5F5DC', font=('arial', 5, 'normal'), command=Location_Six_btnClickFunction).place(x=515, y=354)
-    tk.Button(locations, text='Back to main page', bg='#B0E0E6', font=('arial', 9, 'normal'), command=Back_to_main_page_btnClickFunction).place(x=474, y=61)
-    tk.Label(locations, text='Exquisite locations for our valued customers ', bg='#8B7D6B', font=('arial', 8, 'normal')).place(x=408, y=14)
+    # This is the section of code which creates the a label
+    Label(Locations, text='Location', bg='#F0F8FF', font=('arial', 17, 'normal')).place(x=19, y=25)
+
+
+    # This is the section of code which creates the a label
+    Label(Locations, text='Location 1', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=80, y=182)
+
+
+    # This is the section of code which creates the a label
+    Label(Locations, text='Location 2', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=255, y=178)
+
+
+    # This is the section of code which creates the a label
+    Label(Locations, text='Location 3', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=79, y=341)
+
+
+    # This is the section of code which creates the a label
+    Label(Locations, text='Location 4', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=256, y=340)
+
+
+    # This is the section of code which creates a button
+    Button(Locations, text='Back to menu', bg='#F0F8FF', font=('arial', 10, 'normal'), command=btnClickFunction).place(x=279, y=21)
+
+
+    # This is the section of code which creates a combo box
+    comboOneTwoPunch= ttk.Combobox(Locations, values=['Location 1', 'Location 2', 'Location 3', 'Location 4'], font=('arial', 10, 'normal'), width=10)
+    comboOneTwoPunch.place(x=452, y=122)
+    comboOneTwoPunch.current(1)
+
+
+
+
+
+
+    # This is the section of code which creates the a label
+    Label(Locations, text='Manual choice', bg='#F0F8FF', font=('arial', 15, 'normal')).place(x=439, y=58)
+
+    #  # this is a function which returns the selected combo box item
+    # def getSelectedComboItem():
+    #     return Lcaotion.get()
+
+
+    # # this is a function which returns the selected combo box item
+    # def getSelectedComboItem():
+    #     return Lcaotiass.get()
+
+
+
+
+    Locations.mainloop()
 
 def About_Us_btnClickFunction():
     global about_page
@@ -350,7 +434,7 @@ def Login_page():
 
     # Buttons to open sign-up and sign-in windows
     tk.Button(Login_page, text='Sign Up', bg='#F5f5dc', font=('arial', 12, 'normal'), command=sign_up).place(x=250, y=200)
-    tk.Button(Login_page, text='Sign In', bg='#F5f5dc', font=('arial', 12, 'normal'), command=sign_in).place(x=250, y=235)
+    # tk.Button(Login_page, text='Sign In', bg='#F5f5dc', font=('arial', 12, 'normal'), command=sign_in).place(x=250, y=235)
     tk.Button(Login_page, text='login', bg='#F5f5dc', font=('arial', 12, 'normal'), command=Main_Page).place(x=400, y=235)
     tk.Button(Login_page, text='login', bg='#F5f5dc', font=('arial', 12, 'normal'), command=Login_page).place(x=120, y=235)
     Login_page.mainloop()
@@ -379,4 +463,3 @@ login_button.place(x=400, y=235)
 tk.Button(login_page, text='Sign up', bg='#B0E0E6', font=('arial', 9, 'normal'), command=sign_up).place(x=400, y=61)
 
 login_page.mainloop()
-
