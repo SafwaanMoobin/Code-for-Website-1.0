@@ -1,92 +1,112 @@
 import tkinter as tk
 from tkinter import messagebox
-import csv
+from tkcalendar import Calendar
+from datetime import datetime
+import re
 
-# Dictionary to store user information
-users = {}
+selected_dates = set()
 
-# Function to load users from CSV file
-def load_users():
+def store_date(date):
+    selected_dates.add(date)
+    print("Stored dates:", selected_dates)
+
+def on_date_selected(event):
+    selected_date = cal.selection_get()
+    print("Selected date:", selected_date)
+    store_date(selected_date.strftime('%Y-%m-%d'))
+
+def is_valid_date(date_string):
     try:
-        with open('users.csv', mode='r', newline='') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                username, password, email = row
-                users[username] = {'password': password, 'email': email}
-    except FileNotFoundError:
-        pass
+        datetime.strptime(date_string, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
 
-# Load users from CSV file at the start
-load_users()
-
-# Function to validate the username
-def validate_username(username):
-    return 3 <= len(username) <= 10 and username.isalnum()
-
-# Dummy function to check sign-in status
-def check_sign_in(username, password):
-    return username in users and users[username]['password'] == password
-
-# Function to handle login button click
-def handle_login(username_entry, password_entry):
-    username = username_entry.get()
-    password = password_entry.get()
-
-    if check_sign_in(username, password):
-        Main_Page()
+def validate_and_store_date():
+    user_input = date_entry.get()
+    # Check if the input matches the MM/DD/YY format
+    if re.match(r"\d{2}/\d{2}/\d{2}", user_input):
+        try:
+            entered_date = datetime.strptime(user_input, '%m/%d/%y').date()
+            if entered_date in selected_dates:
+                messagebox.showerror("Date Already Chosen", "Date chosen already, please select another booking.")
+            else:
+                store_date(entered_date.strftime('%Y-%m-%d'))
+                cal.calevent_create(entered_date, "Chosen", 'booked')
+                date_entry.delete(0, tk.END)
+        except ValueError:
+            messagebox.showerror("Invalid Date Format", "Please enter the date in the format MM/DD/YY.")
     else:
-        messagebox.showerror("Error", "Invalid username or password. Please try again.")
+        messagebox.showerror("Invalid Date Format", "Please enter the date in the format MM/DD/YY.")
 
-    username_entry.delete(0, tk.END)
-    password_entry.delete(0, tk.END)
+def create_calendar_page():
+    global date_entry
+    global cal
 
-# Function to represent main page transition
-def Main_Page():
-    main_page = tk.Tk()
-    main_page.geometry('512x393')
-    main_page.configure(background='#F5f5dc')
-    main_page.title('Hello, I\'m the main window')
+    def on_date_selected(event):
+        selected_date_str = cal.get_date()
+        try:
+            selected_date = datetime.strptime(selected_date_str, '%m/%d/%y').date()
+            if selected_date in selected_dates:
+                messagebox.showerror("Date Already Chosen", "Date chosen already, please select another booking.")
+            else:
+                store_date(selected_date.strftime('%Y-%m-%d'))
+                cal.calevent_create(selected_date, "Chosen", 'booked')
+                date_entry.delete(0, tk.END)
+                date_entry.insert(0, selected_date_str)
+        except ValueError:
+            messagebox.showerror("Date Format Error", "Error parsing selected date.")
 
-    # Function to create a white frame with specified dimensions
-    def create_white_frame(x, y, width, height):
-        frame = tk.Frame(main_page, bg='#FFFFFF', width=width, height=height)
-        frame.place(x=x, y=y)
-        return frame
+    def back_to_main_page_btn_click_function():
+        calendar_page.destroy()
 
-    # Create white frames as backgrounds for the buttons and labels
-    create_white_frame(0, 100, 512, 50)  # Horizontal line under the labels
-    create_white_frame(250, 0, 50, 343)  # Vertical line between 'About us' and 'Services'
-    create_white_frame(390, 50, 50, 600)  # Vertical line between 'Services' and 'Locations'
-    create_white_frame(250, 100, 263, 50)  # Horizontal line under the buttons
+    # Set up the calendar window
+    calendar_page = tk.Toplevel()
+    calendar_page.geometry('620x400')
+    calendar_page.configure(background='#7FFFD4')
+    calendar_page.title("Calendar Picker")
 
-    tk.Label(main_page, text='Welcome to Xtrive Services', bg='#B0E0E6', font=('arial', 12, 'normal')).place(x=17, y=27)
-    tk.Button(main_page, text='About us', bg='#7F675B', font=('arial', 12, 'normal')).place(x=252, y=59)
-    tk.Button(main_page, text='Services', bg='#7F675B', font=('arial', 12, 'normal')).place(x=366, y=58)
-    tk.Button(main_page, text='Locations', bg='#7F675B', font=('arial', 12, 'normal')).place(x=361, y=7)
-    tk.Button(main_page, text='For hire', bg='#7F675B', font=('arial', 12, 'normal')).place(x=259, y=7)
-    tk.Label(main_page, text='Information about our website', bg='#B0E0E6', font=('arial', 10, 'normal')).place(x=253, y=103)
-    tk.Label(main_page, text='Xtrive', bg='#B0E0E6', font=('arial', 25, 'normal')).place(x=69, y=71)
+    # Create a Calendar widget
+    cal = Calendar(calendar_page, selectmode='day', year=2024, month=7, day=20)
+    cal.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky='nsew')
+    cal.bind("<<CalendarSelected>>", on_date_selected)
 
-    main_page.mainloop()
+    # Create a text input box for manual date entry
+    date_entry = tk.Entry(calendar_page)
+    date_entry.grid(row=1, column=0, padx=10, pady=10, columnspan=2, sticky='ew')
 
-# Create the login page
-login_page = tk.Tk()
-login_page.title("Login")
-login_page.geometry('512x393')
-login_page.configure(background='#F5f5dc')
+    # Create a button to validate and store the manually entered date
+    validate_button = tk.Button(calendar_page, text="Submit Date", command=validate_and_store_date)
+    validate_button.grid(row=1, column=2, padx=10, pady=10)
 
-# Username label and entry
-tk.Label(login_page, text='Username:', bg='#F5f5dc', font=('arial', 12, 'normal')).place(x=150, y=150)
-username_entry = tk.Entry(login_page, width=30)
-username_entry.place(x=250, y=150)
+    # Create labels
+    tk.Label(calendar_page, text='Select a date or enter a date in MM/DD/YY format', bg='#7FFFD4', font=('arial', 12, 'normal')).grid(row=2, column=0, columnspan=3, padx=10, pady=10, sticky='n')
 
-# Password label and entry
-tk.Label(login_page, text='Password:', bg='#F5f5dc', font=('arial', 12, 'normal')).place(x=150, y=200)
-password_entry = tk.Entry(login_page, show='*', width=30)
-password_entry.place(x=250, y=200)
+    tk.Label(calendar_page, text='Manual Date Entry:', bg='#7FFFD4', font=('arial', 12, 'normal')).grid(row=3, column=0, padx=10, pady=10, sticky='w')
 
-# Login button
-login_button = tk.Button(login_page, text='Login', bg='#7F675B', font=('arial', 12, 'normal'), command=lambda: handle_login(username_entry, password_entry))
-login_button.place(x=400, y=235)
+    # Create a button to go back to the main page
+    back_button = tk.Button(calendar_page, text='Back to main page', bg='#B0E0E6', font=('arial', 9, 'normal'), command=back_to_main_page_btn_click_function)
+    back_button.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky='e')
 
-login_page.mainloop()
+    # Adjust column and row weights for better resizing behavior
+    calendar_page.grid_columnconfigure(0, weight=1)
+    calendar_page.grid_columnconfigure(1, weight=1)
+    calendar_page.grid_columnconfigure(2, weight=1)
+    calendar_page.grid_rowconfigure(0, weight=1)
+    calendar_page.grid_rowconfigure(1, weight=1)
+    calendar_page.grid_rowconfigure(2, weight=1)
+    calendar_page.grid_rowconfigure(3, weight=1)
+    calendar_page.grid_rowconfigure(4, weight=1)
+
+    calendar_page.mainloop()
+
+# Assuming there is a main Tkinter window setup
+root = tk.Tk()
+root.title("Main Page")
+root.geometry('300x200')
+
+# Button to open the calendar page
+open_calendar_btn = tk.Button(root, text="Open Calendar", command=create_calendar_page)
+open_calendar_btn.pack(pady=20)
+
+root.mainloop()
