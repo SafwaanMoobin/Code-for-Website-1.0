@@ -7,6 +7,7 @@ import csv
 from tkinter import ttk
 from datetime import datetime
 from tkinter import messagebox
+import os
 
 
 
@@ -147,38 +148,62 @@ def handle_login(username_entry, password_entry):
     username_entry.delete(0, tk.END)
     password_entry.delete(0, tk.END)
 
-
-#This code snippet manages the selection and storage of dates in a list 
-# called selected_dates. It includes functions for storing a date, handling a date selection event, and validating and storing a user-input dateimport re
 selected_dates = set()
+csv_file = 'selected_dates.csv'
 
-def store_date(date):
-    selected_dates.add(date)
+def store_date(date, remove=False):
+    if remove:
+        selected_dates.discard(date)
+    else:
+        selected_dates.add(date)
+    save_dates_to_csv()
     print("Stored dates:", selected_dates)
 
-def on_date_selected(event):
-    selected_date = cal.selection_get()
-    print("Selected date:", selected_date)
-    store_date(selected_date.strftime('%Y-%m-%d'))
+def save_dates_to_csv():
+    with open(csv_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        for date in selected_dates:
+            writer.writerow([date])
 
-def is_valid_date(date_string):
+def load_dates():
+    if os.path.exists(csv_file):
+        with open(csv_file, mode='r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                selected_dates.add(row[0])
+    print("Loaded dates:", selected_dates)
+
+def on_date_selected(event):
+    selected_date = cal.selection_get().strftime('%Y-%m-%d')
+    if selected_date in selected_dates:
+        messagebox.showerror("Date Already Chosen", "Date chosen already, please select another booking.")
+    else:
+        store_date(selected_date)
+        cal.calevent_create(datetime.strptime(selected_date, '%Y-%m-%d'), "Chosen", 'booked')
+
+def on_date_right_click(event):
+    selected_date_str = cal.get_date()
     try:
-        datetime.strptime(date_string, '%Y-%m-%d')
-        return True
+        selected_date = datetime.strptime(selected_date_str, '%m/%d/%Y').date().strftime('%Y-%m-%d')
+        if selected_date in selected_dates:
+            cal.calevent_remove('booked')
+            store_date(selected_date, remove=True)
+        else:
+            messagebox.showerror("Date Not Selected", "Date not selected for booking.")
     except ValueError:
-        return False
+        messagebox.showerror("Date Format Error", "Error parsing selected date.")
 
 def validate_and_store_date():
     user_input = date_entry.get()
     # Check if the input matches the MM/DD/YYYY format
     if re.match(r"\d{2}/\d{2}/\d{4}", user_input):
         try:
-            entered_date = datetime.strptime(user_input, '%m/%d/%Y').date()
+            entered_date = datetime.strptime(user_input, '%m/%d/%Y').date().strftime('%Y-%m-%d')
             if entered_date in selected_dates:
                 messagebox.showerror("Date Already Chosen", "Date chosen already, please select another booking.")
             else:
-                store_date(entered_date.strftime('%Y-%m-%d'))
-                cal.calevent_create(entered_date, "Chosen", 'booked')
+                store_date(entered_date)
+                cal.calevent_create(datetime.strptime(entered_date, '%Y-%m-%d'), "Chosen", 'booked')
                 date_entry.delete(0, tk.END)
         except ValueError:
             messagebox.showerror("Invalid Date Format", "Please enter the date in the format MM/DD/YYYY.")
@@ -192,12 +217,12 @@ def create_calendar_page():
     def on_date_selected(event):
         selected_date_str = cal.get_date()
         try:
-            selected_date = datetime.strptime(selected_date_str, '%m/%d/%Y').date()
+            selected_date = datetime.strptime(selected_date_str, '%m/%d/%Y').date().strftime('%Y-%m-%d')
             if selected_date in selected_dates:
                 messagebox.showerror("Date Already Chosen", "Date chosen already, please select another booking.")
             else:
-                store_date(selected_date.strftime('%Y-%m-%d'))
-                cal.calevent_create(selected_date, "Chosen", 'booked')
+                store_date(selected_date)
+                cal.calevent_create(datetime.strptime(selected_date, '%Y-%m-%d'), "Chosen", 'booked')
                 date_entry.delete(0, tk.END)
                 date_entry.insert(0, selected_date_str)
         except ValueError:
@@ -216,6 +241,7 @@ def create_calendar_page():
     cal = Calendar(calendar_page, selectmode='day', year=2024, month=7, day=20, date_pattern='mm/dd/yyyy')
     cal.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky='nsew')
     cal.bind("<<CalendarSelected>>", on_date_selected)
+    cal.bind("<Button-3>", on_date_right_click)  # Right-click to remove date
 
     # Create a text input box for manual date entry
     date_entry = tk.Entry(calendar_page)
@@ -244,7 +270,18 @@ def create_calendar_page():
     calendar_page.grid_rowconfigure(3, weight=1)
     calendar_page.grid_rowconfigure(4, weight=1)
 
+    # Highlight previously selected dates
+    for date in selected_dates:
+        try:
+            date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+            cal.calevent_create(date_obj, "Chosen", 'booked')
+        except ValueError:
+            continue
+
     calendar_page.mainloop()
+
+# Load dates from CSV file when the program starts
+load_dates()
 
 
 def Services_page():
