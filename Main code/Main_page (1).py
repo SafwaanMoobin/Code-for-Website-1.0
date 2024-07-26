@@ -5,6 +5,7 @@ import tkinter.messagebox as messagebox
 from tkinter import * 
 import csv
 from tkinter import ttk
+from datetime import datetime
 
 selected_dates = []
 
@@ -173,39 +174,105 @@ def handle_login(username_entry, password_entry):
     username_entry.delete(0, tk.END)
     password_entry.delete(0, tk.END)
 
-
 def create_calendar_page():
-    global date_entry  # Ensure the global scope of date_entry
+    global date_entry
+    global chosen_dates
+
+    chosen_dates = set()
+
+    def on_date_selected(event):
+        selected_date_str = cal.get_date()
+        try:
+            # Convert string to datetime.date object
+            selected_date = datetime.strptime(selected_date_str, '%m/%d/%y').date()
+
+            if selected_date in chosen_dates:
+                messagebox.showerror("Date Already Chosen", "Date chosen already, please select another booking.")
+            else:
+                # Add to chosen dates
+                chosen_dates.add(selected_date)
+                
+                # Highlight the selected date
+                cal.calevent_create(selected_date, "Chosen", 'booked')  # Create a fake event to indicate the date is booked
+
+                # Display the selected date in the entry field
+                date_entry.delete(0, tk.END)
+                date_entry.insert(0, selected_date_str)
+        except ValueError:
+            messagebox.showerror("Date Format Error", "Error parsing selected date.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def validate_and_store_date():
+        try:
+            # Convert entry text to datetime.date object
+            entered_date_str = date_entry.get()
+            entered_date = datetime.strptime(entered_date_str, '%m/%d/%y').date()
+
+            if entered_date in chosen_dates:
+                # Date has already been chosen
+                messagebox.showerror("Date Already Chosen", "Date chosen already, please select another booking.")
+            else:
+                # Date is valid and not previously booked
+                chosen_dates.add(entered_date)
+                cal.calevent_create(entered_date, "Chosen", 'booked')
+                cal.tag_configure('booked', background='red', foreground='white')  # Configure the event style
+                print(f"Entered Date: {entered_date_str}")
+
+                # Optionally clear the date entry after successful submission
+                date_entry.delete(0, tk.END)
+        except ValueError:
+            # Handle invalid date format
+            messagebox.showerror("Invalid Date Format", "Please enter the date in the format MM/DD/YY.")
+        except Exception as e:
+            # Handle any other exceptions
+            print(f"Error: {e}")
+
+    def back_to_main_page_btn_click_function():
+        calendar_page.destroy()
 
     # Set up the calendar window
     calendar_page = tk.Toplevel()
-    calendar_page.geometry('621x397')
+    calendar_page.geometry('620x400')
     calendar_page.configure(background='#7FFFD4')
     calendar_page.title("Calendar Picker")
 
     # Create a Calendar widget
     global cal
     cal = Calendar(calendar_page, selectmode='day', year=2024, month=7, day=20)
-    cal.place(x=180, y=110)
-    
-    # Bind the date selection event
+    cal.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky='nsew')
     cal.bind("<<CalendarSelected>>", on_date_selected)
 
     # Create a text input box for manual date entry
     date_entry = tk.Entry(calendar_page)
-    date_entry.place(x=180, y=350)
-    
+    date_entry.grid(row=1, column=0, padx=10, pady=10, columnspan=2, sticky='ew')
+
     # Create a button to validate and store the manually entered date
     validate_button = tk.Button(calendar_page, text="Submit Date", command=validate_and_store_date)
-    validate_button.place(x=320, y=345)
-
-    def Back_to_main_page_btnClickFunction():
-        calendar_page.destroy()
+    validate_button.grid(row=1, column=2, padx=10, pady=10)
 
     # Create labels
-    tk.Label(calendar_page, text='Select a date or enter a date in YYYY-MM-DD format', bg='#7FFFD4', font=('arial', 12, 'normal')).place(x=28, y=36)
-    tk.Label(calendar_page, text='Manual Date Entry:', bg='#7FFFD4', font=('arial', 12, 'normal')).place(x=26, y=325)
-    tk.Button(calendar_page, text='Back to main page', bg='#B0E0E6', font=('arial', 9, 'normal'), command=Back_to_main_page_btnClickFunction).place(x=474, y=61)
+    tk.Label(calendar_page, text='Select a date or enter a date in MM/DD/YY format', bg='#7FFFD4', font=('arial', 12, 'normal')).grid(row=2, column=0, columnspan=3, padx=10, pady=10, sticky='n')
+
+    tk.Label(calendar_page, text='Manual Date Entry:', bg='#7FFFD4', font=('arial', 12, 'normal')).grid(row=3, column=0, padx=10, pady=10, sticky='w')
+
+    # Create a button to go back to the main page
+    back_button = tk.Button(calendar_page, text='Back to main page', bg='#B0E0E6', font=('arial', 9, 'normal'), command=back_to_main_page_btn_click_function)
+    back_button.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky='e')
+
+    # Adjust column and row weights for better resizing behavior
+    calendar_page.grid_columnconfigure(0, weight=1)
+    calendar_page.grid_columnconfigure(1, weight=1)
+    calendar_page.grid_columnconfigure(2, weight=1)
+    calendar_page.grid_rowconfigure(0, weight=1)
+    calendar_page.grid_rowconfigure(1, weight=1)
+    calendar_page.grid_rowconfigure(2, weight=1)
+    calendar_page.grid_rowconfigure(3, weight=1)
+    calendar_page.grid_rowconfigure(4, weight=1)
+
+    calendar_page.mainloop()
+
+
 
 def Services_page():
     # this is the function called when the button is clicked
@@ -279,34 +346,88 @@ def Services_page():
         
 
 def For_Hire_Page():
-    def onebtnClickFunction():
-        print('1')
 
-    def twobtnClickFunction():
-        print('2')
+    # this is the function called when the button is clicked
+    def btnClickFunction():
+        print('clicked')
 
-    def threebtnClickFunction():
-        print('3')
 
-    def fourbtnClickFunction():
-        print('4')
+    # this is a function which returns the selected combo box item
+    def getSelectedComboItem():
+        return comboOneTwoPunch.get()
 
-    def Back_to_Main_btnClickFunction():
-        for_hire.destroy()
 
-    # Set up the for hire window
-    for_hire = tk.Toplevel()
-    for_hire.geometry('510x400')
-    for_hire.configure(background='#FFEBCD')
-    for_hire.title('For Hire')
+    # this is the function called when the button is clicked
+    def btnClickFunction():
+        print('clicked')
 
-    # Create labels and buttons
-    tk.Button(for_hire, text='Button text!', bg='#FFEBCD', font=('arial', 15, 'normal'), command=onebtnClickFunction).place(x=119, y=165)
-    tk.Button(for_hire, text='Button text1!', bg='#FFEBCD', font=('arial', 15, 'normal'), command=twobtnClickFunction).place(x=313, y=164)
-    tk.Button(for_hire, text='Button text2!', bg='#FFEBCD', font=('arial', 15, 'normal'), command=threebtnClickFunction).place(x=106, y=353)
-    tk.Button(for_hire, text='Button text3!', bg='#FFEBCD', font=('arial', 15, 'normal'), command=fourbtnClickFunction).place(x=314, y=351)
-    tk.Button(for_hire, text='Back to main page', bg='#B0E0E6', font=('arial', 9, 'normal'), command=Back_to_Main_btnClickFunction).place(x=350, y=61)
-    tk.Label(for_hire, text='Welcome to the extensive amount of people to hire', bg='#FFEBCD', font=('arial', 15, 'normal')).place(x=12, y=91)
+
+
+    For_hire = Tk()
+
+    # This is the section of code which creates the main window
+    For_hire.geometry('585x452')
+    For_hire.configure(background='#F0F8FF')
+    For_hire.title('Hello, I\'m the main window')
+
+
+    # This is the section of code which creates the a label
+    Label(For_hire, text='For Hire', bg='#F0F8FF', font=('arial', 17, 'normal')).place(x=31, y=37)
+
+
+    # This is the section of code which creates a button
+    Button(For_hire, text='Back to menu', bg='#F0F8FF', font=('arial', 10, 'normal'), command=btnClickFunction).place(x=347, y=14)
+
+
+    # This is the section of code which creates the a label
+    Label(For_hire, text='Team 1', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=55, y=239)
+
+
+    # This is the section of code which creates the a label
+    Label(For_hire, text='Text ', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=228, y=154)
+    Team_1_text = """
+    Welcome to Xtrive Services!
+
+    We are dedicated to providing top-notch services to our customers.
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vestibulum finibus ex, at blandit dolor sodales a.
+    """
+    tk.Label(For_hire, text=Team_1_text, justify='left', wraplength=380, font=('arial', 10, 'normal')).pack(padx=20, pady=10)
+
+    Team_2_text = """
+    Welcome to Xtrive Services!
+
+    We are dedicated to providing top-notch services to our customers.
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vestibulum finibus ex, at blandit dolor sodales a.
+    """
+    tk.Label(For_hire, text=Team_2_text, justify='left', wraplength=380, font=('arial', 10, 'normal')).pack(padx=20, pady=10)
+
+
+
+    # This is the section of code which creates the a label
+    Label(For_hire, text='Team 2', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=335, y=239)
+
+
+    # This is the section of code which creates the a label
+    Label(For_hire, text='Text 2', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=500, y=132)
+
+
+    # This is the section of code which creates a combo box
+    comboOneTwoPunch= ttk.Combobox(For_hire, values=['Thing 1', 'Thing 2'], font=('arial', 12, 'normal'), width=10)
+    comboOneTwoPunch.place(x=124, y=377)
+    comboOneTwoPunch.current(1)
+
+
+    # This is the section of code which creates a button
+    Button(For_hire, text='Submit', bg='#F0F8FF', font=('arial', 10, 'normal'), command=btnClickFunction).place(x=293, y=402)
+
+
+    # This is the section of code which creates the a label
+    Label(For_hire, text='Help', bg='#F0F8FF', font=('arial', 10, 'normal')).place(x=75, y=381)
+
+
+    For_hire.mainloop()
+
+
 
 def Locations_Page():
     # this is the function called when the button is clicked
@@ -351,12 +472,19 @@ def Locations_Page():
     # This is the section of code which creates a button
     Button(Locations, text='Back to menu', bg='#F0F8FF', font=('arial', 10, 'normal'), command=btnClickFunction).place(x=279, y=21)
 
+    # This is the section of code which creates a button
+    Button(Locations, text='Submit', bg='#F0F8FF', font=('arial', 8, 'normal'), command=btnClickFunction).place(x=505, y=250)
+
 
     # This is the section of code which creates a combo box
     comboOneTwoPunch= ttk.Combobox(Locations, values=['Location 1', 'Location 2', 'Location 3', 'Location 4'], font=('arial', 10, 'normal'), width=10)
     comboOneTwoPunch.place(x=452, y=122)
     comboOneTwoPunch.current(1)
 
+    # This is the section of code which creates a combo box
+    comboOneTwoPunch= ttk.Combobox(Locations, values=['Location 1', 'Location 2', 'Location 3', 'Location 4'], font=('arial', 10, 'normal'), width=10)
+    comboOneTwoPunch.place(x=452, y=200)
+    comboOneTwoPunch.current(1)
 
 
 
@@ -373,9 +501,6 @@ def Locations_Page():
     # # this is a function which returns the selected combo box item
     # def getSelectedComboItem():
     #     return Lcaotiass.get()
-
-
-
 
     Locations.mainloop()
 
@@ -424,6 +549,8 @@ def Main_Page():
     tk.Button(Main_page, text='Locations', bg='#F5f5dc', font=('arial', 12, 'normal'), command=Locations_Page).place(x=361, y=7)
     tk.Button(Main_page, text='For hire', bg='#F5f5dc', font=('arial', 12, 'normal'), command=For_Hire_Page).place(x=100, y=7)
     tk.Label(Main_page, text='Information about our website', bg='#B0E0E6', font=('arial', 10, 'normal')).place(x=253, y=103)
+    tk.Button(Main_page, text='calendar', bg='#B0E0E6', font=('arial', 9, 'normal'), command=create_calendar_page).place(x=253, y=61)
+
 
 def Login_page():
     # Example usage in main window
@@ -437,6 +564,7 @@ def Login_page():
     # tk.Button(Login_page, text='Sign In', bg='#F5f5dc', font=('arial', 12, 'normal'), command=sign_in).place(x=250, y=235)
     tk.Button(Login_page, text='login', bg='#F5f5dc', font=('arial', 12, 'normal'), command=Main_Page).place(x=400, y=235)
     tk.Button(Login_page, text='login', bg='#F5f5dc', font=('arial', 12, 'normal'), command=Login_page).place(x=120, y=235)
+    
     Login_page.mainloop()
 
 
@@ -461,5 +589,6 @@ login_button = tk.Button(login_page, text='Login', bg='#B0E0E6', font=('arial', 
 login_button.place(x=400, y=235)
 
 tk.Button(login_page, text='Sign up', bg='#B0E0E6', font=('arial', 9, 'normal'), command=sign_up).place(x=400, y=61)
+
 
 login_page.mainloop()
