@@ -356,7 +356,6 @@ def Services_page():
         
 
 def For_Hire_Page():
-
     # this is the function called when the button is clicked
     def btnClickFunction():
         print('clicked')
