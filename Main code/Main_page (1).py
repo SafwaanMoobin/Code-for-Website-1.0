@@ -13,7 +13,7 @@ def store_date(date):
     selected_dates.append(date)
     print("Stored dates:", selected_dates)
 
-
+aa = None
 def on_date_selected(event):
     selected_date = cal.selection_get()
     print("Selected date:", selected_date)
