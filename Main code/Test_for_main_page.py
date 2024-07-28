@@ -36,7 +36,7 @@ def load_users():
                     selected_package = row[3]
                     selected_dates = row[4:-2]  # Extract dates before combo item and locations
                     selected_combo_item = row[-2]
-                    selected_locations = row[-1:]
+                    selected_locations = row[-1].split(';')  # Assuming locations are stored as a semi-colon separated string
                     
                     users[username] = {
                         'password': password,
@@ -48,7 +48,7 @@ def load_users():
                     }
     else:
         print("users.csv file not found.")
-
+        
 def save_users():
     with open('users.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
@@ -60,7 +60,7 @@ def save_users():
                 user_data['selected_package']
             ] + user_data['selected_dates'] + [
                 user_data['selected_combo_item']
-            ] + user_data['selected_locations']
+            ] + [';'.join(user_data['selected_locations'])]  # Join locations with a semi-colon
             writer.writerow(row)
 
 def sign_up_button_click(username_entry, password_entry, email_entry):
@@ -351,80 +351,45 @@ def For_Hire_Page():
 # Example function to simulate user login and page access
 
 def Locations_Page():
-    # this is the function called when the button is clicked
     def btnClickFunction():
         print('clicked')
+        # Store selected locations
+        selected_locations = [
+            combo1.get(),
+            combo2.get()
+        ]
+        if current_user:
+            users[current_user]['selected_locations'] = selected_locations
+            save_users()
+        Locations.destroy()
 
-
-    # this is a function which returns the selected combo box item
-    def getSelectedComboItem():
-        return comboOneTwoPunch.get()
-
-
-   
-    Locations = Tk()
-
-    # This is the section of code which creates the main window
+    Locations = tk.Tk()
     Locations.geometry('612x373')
     Locations.configure(background='#F0F8FF')
-    Locations.title('Hello, I\'m the main window')
+    Locations.title('Locations Page')
 
+    tk.Label(Locations, text='Location', bg='#F0F8FF', font=('arial', 17, 'normal')).place(x=19, y=25)
+    tk.Label(Locations, text='Location 1', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=80, y=182)
+    tk.Label(Locations, text='Location 2', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=255, y=178)
+    tk.Label(Locations, text='Location 3', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=79, y=341)
+    tk.Label(Locations, text='Location 4', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=256, y=340)
 
-    # This is the section of code which creates the a label
-    Label(Locations, text='Location', bg='#F0F8FF', font=('arial', 17, 'normal')).place(x=19, y=25)
+    tk.Button(Locations, text='Back to menu', bg='#F0F8FF', font=('arial', 10, 'normal'), command=btnClickFunction).place(x=279, y=21)
+    tk.Button(Locations, text='Submit', bg='#F0F8FF', font=('arial', 8, 'normal'), command=btnClickFunction).place(x=505, y=250)
 
+    combo1 = ttk.Combobox(Locations, values=['Location 1', 'Location 2', 'Location 3', 'Location 4'], font=('arial', 10, 'normal'), width=10)
+    combo1.place(x=452, y=122)
+    combo1.current(1)
 
-    # This is the section of code which creates the a label
-    Label(Locations, text='Location 1', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=80, y=182)
+    combo2 = ttk.Combobox(Locations, values=['Location 1', 'Location 2', 'Location 3', 'Location 4'], font=('arial', 10, 'normal'), width=10)
+    combo2.place(x=452, y=200)
+    combo2.current(1)
 
-
-    # This is the section of code which creates the a label
-    Label(Locations, text='Location 2', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=255, y=178)
-
-
-    # This is the section of code which creates the a label
-    Label(Locations, text='Location 3', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=79, y=341)
-
-
-    # This is the section of code which creates the a label
-    Label(Locations, text='Location 4', bg='#F0F8FF', font=('arial', 12, 'normal')).place(x=256, y=340)
-
-
-    # This is the section of code which creates a button
-    Button(Locations, text='Back to menu', bg='#F0F8FF', font=('arial', 10, 'normal'), command=btnClickFunction).place(x=279, y=21)
-
-    # This is the section of code which creates a button
-    Button(Locations, text='Submit', bg='#F0F8FF', font=('arial', 8, 'normal'), command=btnClickFunction).place(x=505, y=250)
-
-
-    # This is the section of code which creates a combo box
-    comboOneTwoPunch= ttk.Combobox(Locations, values=['Location 1', 'Location 2', 'Location 3', 'Location 4'], font=('arial', 10, 'normal'), width=10)
-    comboOneTwoPunch.place(x=452, y=122)
-    comboOneTwoPunch.current(1)
-
-    # This is the section of code which creates a combo box
-    comboOneTwoPunch= ttk.Combobox(Locations, values=['Location 1', 'Location 2', 'Location 3', 'Location 4'], font=('arial', 10, 'normal'), width=10)
-    comboOneTwoPunch.place(x=452, y=200)
-    comboOneTwoPunch.current(1)
-
-
-
-
-
-    # This is the section of code which creates the a label
-    Label(Locations, text='Manual choice', bg='#F0F8FF', font=('arial', 15, 'normal')).place(x=439, y=58)
-
-    #  # this is a function which returns the selected combo box item
-    # def getSelectedComboItem():
-    #     return Lcaotion.get()
-
-
-    # # this is a function which returns the selected combo box item
-    # def getSelectedComboItem():
-    #     return Lcaotiass.get()
+    tk.Label(Locations, text='Manual choice', bg='#F0F8FF', font=('arial', 15, 'normal')).place(x=439, y=58)
 
     Locations.mainloop()
 
+    
 def About_Us_btnClickFunction():
     global about_page
 
