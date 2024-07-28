@@ -9,11 +9,16 @@ from datetime import datetime
 from tkinter import messagebox
 import os
 
+def store_combo_item(selected_item):
+    if current_user:
+        users[current_user]['selected_combo_item'] = selected_item
+        save_users()
 
-
-# Initialize empty users dictionary
+# Initialize empty users dictionary and admin credentials
 users = {}
 current_user = None
+admin_username = "admin"  # Admin username
+admin_password = "adminpass"  # Admin password
 
 # Function to validate username format
 def validate_username(username):
@@ -130,9 +135,11 @@ def handle_login(username_entry, password_entry):
     username = username_entry.get()
     password = password_entry.get()
 
-    if username in users and users[username]['password'] == password:
+    if username == admin_username and password == admin_password:
+        current_user = 'admin'
+        admin_page()  # Redirect to admin page
+    elif username in users and users[username]['password'] == password:
         current_user = username
-        load_user_calendar()
         Main_Page()  # Assuming Main_Page is defined elsewhere in your code
     else:
         messagebox.showerror("Error", "Invalid username or password.")
@@ -140,76 +147,110 @@ def handle_login(username_entry, password_entry):
     username_entry.delete(0, tk.END)
     password_entry.delete(0, tk.END)
 
+def admin_page():
+    def remove_dates():
+        selected_dates = [date_listbox.get(i) for i in date_listbox.curselection()]
+        if not selected_dates:
+            messagebox.showwarning("Warning", "No date selected to remove.")
+            return
+        
+        # Remove selected dates from all users
+        for date in selected_dates:
+            for user_data in users.values():
+                if date in user_data['selected_dates']:
+                    user_data['selected_dates'].remove(date)
+        
+        # Update the CSV file with the changes
+        save_users()
+        update_dates_display()
+    
+    def update_dates_display():
+        # Clear the existing widgets
+        for widget in date_frame.winfo_children():
+            widget.destroy()
+
+        # Header labels
+        tk.Label(date_frame, text="Username", width=20, anchor="w").grid(row=0, column=0, padx=5, pady=5)
+        tk.Label(date_frame, text="Selected Dates", anchor="w").grid(row=0, column=1, padx=5, pady=5)
+
+        # User data display
+        row = 1
+        for username, user_data in users.items():
+            tk.Label(date_frame, text=username, width=20, anchor="w").grid(row=row, column=0, padx=5, pady=5)
+            date_list = ", ".join(user_data['selected_dates'])
+            tk.Label(date_frame, text=date_list, anchor="w").grid(row=row, column=1, padx=5, pady=5)
+            row += 1
+
+        # Update Listbox with current dates
+        date_listbox.delete(0, tk.END)
+        all_dates = set(date for user_data in users.values() for date in user_data['selected_dates'])
+        for date in sorted(all_dates):
+            date_listbox.insert(tk.END, date)
+
+    # Create admin window
+    admin_window = tk.Toplevel()
+    admin_window.title("Admin Page")
+
+    tk.Label(admin_window, text="Welcome Admin!").pack()
+
+    # Create a frame for displaying user data and selected dates
+    date_frame = tk.Frame(admin_window)
+    date_frame.pack()
+
+    # Create a Listbox for selecting dates to remove
+    date_listbox = tk.Listbox(admin_window, selectmode=tk.MULTIPLE, width=50, height=10)
+    date_listbox.pack(pady=10)
+
+    # Create a button to remove selected dates
+    remove_button = tk.Button(admin_window, text="Remove Selected Dates", command=remove_dates)
+    remove_button.pack(pady=10)
+
+    # Update display with initial data
+    update_dates_display()
+
+    admin_window.mainloop()
+
 # Load existing users
 load_users()
-
-# Function to store selected date
-def store_date(date, remove=False):
-    if current_user:
-        if remove:
-            if date in users[current_user]['selected_dates']:
-                users[current_user]['selected_dates'].remove(date)
-        else:
-            if date not in users[current_user]['selected_dates']:
-                users[current_user]['selected_dates'].append(date)
-        save_users()
-
-def store_combo_item(selected_item):
-    if current_user:
-        users[current_user]['selected_combo_item'] = selected_item
-        save_users()
-
-def load_user_calendar():
-    global selected_dates
-    selected_dates = set(users.get(current_user, {}).get('selected_dates', []))
-
-# Function to validate and store date from entry
-def validate_and_store_date():
-    user_input = date_entry.get()
-    if re.match(r"\d{2}/\d{2}/\d{4}", user_input):
-        try:
-            entered_date = datetime.strptime(user_input, '%m/%d/%Y').date().strftime('%Y-%m-%d')
-            if entered_date in selected_dates:
-                messagebox.showerror("Date Already Chosen", "Date chosen already, please select another booking.")
-            else:
-                store_date(entered_date)
-                cal.calevent_create(datetime.strptime(entered_date, '%Y-%m-%d'), "Chosen", 'booked')
-                date_entry.delete(0, tk.END)
-                save_users()  # Save users after storing the date
-        except ValueError:
-            messagebox.showerror("Invalid Date Format", "Please enter the date in the format MM/DD/YYYY.")
-    else:
-        messagebox.showerror("Invalid Date Format", "Please enter the date in the format MM/DD/YYYY.")
-
-# Function to handle date selection
-def on_date_selected(event):
-    selected_date = cal.selection_get().strftime('%Y-%m-%d')
-    if selected_date in selected_dates:
-        messagebox.showerror("Date Already Chosen", "Date chosen already, please select another booking.")
-    else:
-        store_date(selected_date)
-        cal.calevent_create(datetime.strptime(selected_date, '%Y-%m-%d'), "Chosen", 'booked')
-
-# Function to handle right-click to remove or add date
-def on_date_right_click(event):
-    selected_date_str = cal.get_date()
-    try:
-        selected_date = datetime.strptime(selected_date_str, '%m/%d/%Y').date().strftime('%Y-%m-%d')
-        if selected_date in selected_dates:
-            cal.calevent_remove('booked')
-            store_date(selected_date, remove=True)
-        else:
-            messagebox.showerror("Date Not Selected", "Date not selected for booking.")
-    except ValueError:
-        messagebox.showerror("Date Format Error", "Error parsing selected date.")
 
 # Function to create calendar page
 def create_calendar_page():
     global date_entry
     global cal
+    global selected_dates
+
+    def on_date_selected(event):
+        selected_date = cal.get_date()
+        formatted_date = datetime.strptime(selected_date, '%m/%d/%Y').strftime('%Y-%m-%d')
+        if formatted_date not in selected_dates:
+            selected_dates.append(formatted_date)
+            cal.calevent_create(datetime.strptime(selected_date, '%m/%d/%Y').date(), "Chosen", 'booked')
+
+    def on_date_right_click(event):
+        selected_date = cal.get_date()
+        formatted_date = datetime.strptime(selected_date, '%m/%d/%Y').strftime('%Y-%m-%d')
+        if formatted_date in selected_dates:
+            selected_dates.remove(formatted_date)
+            cal.calevent_remove(datetime.strptime(selected_date, '%m/%d/%Y').date(), "Chosen")
+
+    def validate_and_store_date():
+        try:
+            date_str = date_entry.get()
+            date_obj = datetime.strptime(date_str, '%m/%d/%Y').date()
+            formatted_date = date_obj.strftime('%Y-%m-%d')
+            if formatted_date not in selected_dates:
+                selected_dates.append(formatted_date)
+                cal.calevent_create(date_obj, "Chosen", 'booked')
+                date_entry.delete(0, tk.END)
+            else:
+                messagebox.showinfo("Info", "Date already selected.")
+        except ValueError:
+            messagebox.showerror("Error", "Invalid date format. Please use MM/DD/YYYY.")
 
     def submit_and_close():
-        save_users()  # Save users before closing the page
+        if current_user:
+            users[current_user]['selected_dates'] = selected_dates
+            save_users()  # Save users before closing the page
         calendar_page.destroy()  # Close the calendar page
 
     # Set up the calendar window
@@ -241,6 +282,9 @@ def create_calendar_page():
 
     tk.Label(calendar_page, text='Manual Date Entry:', bg='#7FFFD4', font=('arial', 12, 'normal')).grid(row=4, column=0, padx=10, pady=10, sticky='w')
 
+    # Initialize selected_dates for the current user
+    selected_dates = users.get(current_user, {}).get('selected_dates', [])
+
     # Highlight previously selected dates
     for date in selected_dates:
         try:
@@ -250,6 +294,7 @@ def create_calendar_page():
             continue
 
     calendar_page.mainloop()
+
 
 def Services_page():
     # Function to handle package selection
@@ -286,7 +331,6 @@ def Services_page():
     COmbo.current(0)  # Set default value
 
     Pacakges.mainloop()
-
 
 def For_Hire_Page():
     def btnClickFunction():
